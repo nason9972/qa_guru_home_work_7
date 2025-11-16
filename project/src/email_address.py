@@ -9,18 +9,11 @@ class EmailAddress:
             raise ValueError(f"Неправильный email: {address}")
 
     @staticmethod
-    def normalize_address(address):
+    def normalize_address(address)-> str:
         return address.lower().strip()
 
-    def _check_correct_email(self, address):
-        if "@" not in address:
-            return False
-        if address.endswith(".com"):
-            return True
-        if address.endswith(".ru"):
-            return True
-        if address.endswith(".net"):
-            return True
+    def _check_correct_email(self, address)->bool:
+        return '@' in address and address.endswith(('.com', '.ru', 'net'))
 
     @property
     def masked(self):

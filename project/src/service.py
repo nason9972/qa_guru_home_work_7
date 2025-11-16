@@ -2,42 +2,31 @@ from datetime import datetime
 from typing import List
 from project.src.email import Email
 from project.src.status import Status
-
+from copy import deepcopy
 
 class EmailService:
-    def __init__(self):
-        self.sent_emails: List[Email] = []
 
+    def __init__(self, email: Email):
+        self.email = email
+
+    @staticmethod
     def add_send_date(self) -> str:
         now = datetime.now()
         formatted_date = now.strftime("%Y-%m-%d")
         return formatted_date
 
-    def send_email(self, email: Email) -> List[Email]:
-        sent_emails_list = []
-        prepared_email = email.prepare()
-
-        if prepared_email.status == Status.INVALID:
-            prepared_email.status = Status.FAILED
-            self.sent_emails.append(prepared_email)
-            return [prepared_email]
-
-
-        for recipient in prepared_email.recipients:
-            email_copy = Email(
-                subject=prepared_email.subject,
-                body=prepared_email.body,
-                sender=prepared_email.sender,
-                recipients=[recipient],
-                date=self.add_send_date(),
-                short_body=prepared_email.short_body,
-                status=Status.SENT if prepared_email.status == Status.READY else Status.FAILED
-            )
-
-            sent_emails_list.append(email_copy)
-            self.sent_emails.append(email_copy)
-
-        return sent_emails_list
+    def send_email(self,email: Email):
+        emails = []
+        for recipient in self.email.recipients:
+            email_copy = deepcopy(self.email)
+            email_copy.date = self.add_send_date()
+            email_copy.recipients = [recipient]
+            if email_copy.status == Status.READY:
+                email_copy.status = Status.SENT
+            else:
+                email_copy.status = Status.FAILED
+            emails.append(email_copy)
+        return emails
 
 
 class LoggingEmailService(EmailService):
