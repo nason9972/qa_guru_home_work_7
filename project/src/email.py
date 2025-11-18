@@ -27,17 +27,9 @@ class Email:
         return ", ".join(email_addresses)
 
     def clean_data(self) -> "Email":
-        cleaned_subject = clean_text(self.subject)
-        cleaned_body = clean_text(self.body)
-        return Email(
-            subject=cleaned_subject,
-            body=cleaned_body,
-            sender=self.sender,
-            recipients=self.recipients,
-            status=self.status,
-            date=self.date,
-            short_body=self.short_body,
-        )
+        self.subject = clean_text(self.subject)
+        self.body = clean_text(self.body)
+        return self
 
     def add_short_body(self, n=10) -> "Email":
         if not self.body:
@@ -57,20 +49,21 @@ class Email:
         )
 
     def prepare(self):
-        self.clean_data()
+        cleaned_email = self.clean_data()
+        self.subject = cleaned_email.subject
+        self.body = cleaned_email.body
         if self.is_valid_fields():
             self.status = Status.READY
         else:
             self.status = Status.INVALID
         return self
 
-    def __str__(self) -> str:
+    def __repr__(self):
         recipients_str = self.get_recipients_str()
-        body_to_show = self.short_body or self.body
         return (
             f"Status: {self.status}\n"
             f"Кому: {recipients_str}\n"
             f"От: {self.sender.masked}\n"
-            f"Тема: {self.subject}, дата {self.date or 'не указана'}\n"
-            f"{body_to_show}"
+            f"Тема: {self.subject}, дата {self.date}\n"
+            f"{self.short_body or self.body}"
         )
